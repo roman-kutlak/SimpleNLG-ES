@@ -7,7 +7,8 @@ import simplenlg.framework.DocumentElement;
 import simplenlg.framework.NLGElement;
 import simplenlg.lexicon.Lexicon;
 import simplenlg.lexicon.NIHDBLexicon;
-import simplenlg.realiser.english.Realiser;
+//import simplenlg.realiser.english.Realiser;
+import simplenlg.realiser.spanish.Realiser;
 
 import java.io.IOException;
 import java.io.Reader;

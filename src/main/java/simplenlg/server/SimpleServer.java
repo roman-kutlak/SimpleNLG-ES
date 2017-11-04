@@ -20,6 +20,7 @@
 package simplenlg.server;
 
 import simplenlg.lexicon.NIHDBLexicon;
+import simplenlg.lexicon.spanish.XMLLexicon;
 import simplenlg.xmlrealiser.XMLRealiser;
 
 import java.io.*;
@@ -51,14 +52,14 @@ public class SimpleServer implements Runnable {
     /**
      * Set to true to enable printing debug messages.
      */
-    static boolean DEBUG = false;
+    static boolean DEBUG = true;
     /**
      * This path should be replaced by the path to the specialist lexicon.
      * If there is an entry for DB_FILENAME in lexicon.properties, that path
      * will be searched for the lexicon file. Otherwise, the path below will
      * be used.
      */
-    String lexiconPath = "src/main/resources/NIHLexicon/lexAccess2011.data";
+    String lexiconPath = "src/main/resources/default-spanish-lexicon.xml";
     private ServerSocket serverSocket;
     // control the run loop
     private boolean isActive = true;
@@ -71,7 +72,9 @@ public class SimpleServer implements Runnable {
      *      
      * @throws IOException
      */
-    public SimpleServer(int port) throws IOException {
+    public SimpleServer(int port, String lexiconPath) throws IOException {
+        if (lexiconPath != null)
+            this.lexiconPath = lexiconPath;
         startServer(new ServerSocket(port, 8));
     }
    
@@ -108,8 +111,12 @@ public class SimpleServer implements Runnable {
             port = 50007;
         }
 
+        String lexPath = null;
+        if (args.length > 1)
+            lexPath = args[1];
+
         try {
-            SimpleServer serverapp = new SimpleServer(port);
+            SimpleServer serverapp = new SimpleServer(port, lexPath);
 
             Thread server = new Thread(serverapp);
             server.setDaemon(true);
@@ -153,26 +160,9 @@ public class SimpleServer implements Runnable {
 
         System.out.println("Port Number used by Server is: " + serverSocket.getLocalPort());
 
-        // try to read the lexicon path from lexicon.properties file
-        try {
-            Properties prop = new Properties();
-            FileReader reader = new FileReader(new File("./src/main/resources/lexicon.properties"));
-            prop.load(reader);
+        System.out.println("Server is using the following lexicon: " + lexiconPath);
 
-            String dbFile = prop.getProperty("DB_FILENAME");
-
-            if (null != dbFile)
-                lexiconPath = dbFile;
-            else
-                throw new Exception("No DB_FILENAME in lexicon.properties");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("Server is using the following lexicon: "
-                           + lexiconPath);
-
-        XMLRealiser.setLexicon(new NIHDBLexicon(this.lexiconPath));
+        XMLRealiser.setLexicon(new XMLLexicon(this.lexiconPath));
     }
 
     /**
